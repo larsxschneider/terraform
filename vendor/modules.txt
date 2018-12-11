@@ -393,6 +393,10 @@ github.com/keybase/go-crypto/rsa
 github.com/keybase/go-crypto/brainpool
 github.com/keybase/go-crypto/cast5
 github.com/keybase/go-crypto/openpgp/elgamal
+# github.com/kr/pretty v0.1.0
+github.com/kr/pretty
+# github.com/kr/text v0.1.0
+github.com/kr/text
 # github.com/lusis/go-artifactory v0.0.0-20160115162124-7e4ce345df82
 github.com/lusis/go-artifactory/src/artifactory.v401
 # github.com/marstr/guid v1.1.0
@@ -473,7 +477,7 @@ github.com/vmihailenco/msgpack/codes
 github.com/xanzy/ssh-agent
 # github.com/xlab/treeprint v0.0.0-20161029104018-1d6e34225557
 github.com/xlab/treeprint
-# github.com/zclconf/go-cty v0.0.0-20181129180422-88fbe721e0f8
+# github.com/zclconf/go-cty v0.0.0-20181129180422-88fbe721e0f8 => ../../zclconf/go-cty
 github.com/zclconf/go-cty/cty
 github.com/zclconf/go-cty/cty/gocty
 github.com/zclconf/go-cty/cty/convert

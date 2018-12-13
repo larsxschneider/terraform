@@ -519,7 +519,7 @@ func (n *EvalDiff) processIgnoreChangesOld(diff *InstanceDiff) error {
 
 	// If we're just creating the resource, we shouldn't alter the
 	// Diff at all
-	if diff.ChangeType() == DiffCreate {
+	if diff.ChangeType() == plans.Create {
 		return nil
 	}
 

@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform/addrs"
+	"github.com/hashicorp/terraform/plans"
 )
 
 func TestDiffEmpty(t *testing.T) {
@@ -157,11 +158,11 @@ func TestDiffPrune(t *testing.T) {
 func TestModuleDiff_ChangeType(t *testing.T) {
 	cases := []struct {
 		Diff   *ModuleDiff
-		Result DiffChangeType
+		Result plans.Action
 	}{
 		{
 			&ModuleDiff{},
-			DiffNone,
+			plans.NoOp,
 		},
 		{
 			&ModuleDiff{
@@ -169,7 +170,7 @@ func TestModuleDiff_ChangeType(t *testing.T) {
 					"foo": &InstanceDiff{Destroy: true},
 				},
 			},
-			DiffDestroy,
+			plans.Delete,
 		},
 		{
 			&ModuleDiff{
@@ -184,7 +185,7 @@ func TestModuleDiff_ChangeType(t *testing.T) {
 					},
 				},
 			},
-			DiffUpdate,
+			plans.Update,
 		},
 		{
 			&ModuleDiff{
@@ -200,7 +201,7 @@ func TestModuleDiff_ChangeType(t *testing.T) {
 					},
 				},
 			},
-			DiffCreate,
+			plans.Create,
 		},
 		{
 			&ModuleDiff{
@@ -217,7 +218,7 @@ func TestModuleDiff_ChangeType(t *testing.T) {
 					},
 				},
 			},
-			DiffUpdate,
+			plans.Update,
 		},
 	}
 
@@ -333,15 +334,15 @@ func TestModuleDiff_String(t *testing.T) {
 func TestInstanceDiff_ChangeType(t *testing.T) {
 	cases := []struct {
 		Diff   *InstanceDiff
-		Result DiffChangeType
+		Result plans.Action
 	}{
 		{
 			&InstanceDiff{},
-			DiffNone,
+			plans.NoOp,
 		},
 		{
 			&InstanceDiff{Destroy: true},
-			DiffDestroy,
+			plans.Delete,
 		},
 		{
 			&InstanceDiff{
@@ -352,7 +353,7 @@ func TestInstanceDiff_ChangeType(t *testing.T) {
 					},
 				},
 			},
-			DiffUpdate,
+			plans.Update,
 		},
 		{
 			&InstanceDiff{
@@ -364,7 +365,7 @@ func TestInstanceDiff_ChangeType(t *testing.T) {
 					},
 				},
 			},
-			DiffCreate,
+			plans.Create,
 		},
 		{
 			&InstanceDiff{
@@ -377,7 +378,7 @@ func TestInstanceDiff_ChangeType(t *testing.T) {
 					},
 				},
 			},
-			DiffDestroyCreate,
+			plans.DeleteThenCreate,
 		},
 		{
 			&InstanceDiff{
@@ -390,7 +391,7 @@ func TestInstanceDiff_ChangeType(t *testing.T) {
 					},
 				},
 			},
-			DiffDestroyCreate,
+			plans.DeleteThenCreate,
 		},
 	}
 

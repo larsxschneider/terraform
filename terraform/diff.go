@@ -15,27 +15,10 @@ import (
 	"github.com/hashicorp/terraform/config"
 	"github.com/hashicorp/terraform/config/hcl2shim"
 	"github.com/hashicorp/terraform/configs/configschema"
+	"github.com/hashicorp/terraform/plans"
 	"github.com/zclconf/go-cty/cty"
 
 	"github.com/mitchellh/copystructure"
-)
-
-// DiffChangeType is an enum with the kind of changes a diff has planned.
-type DiffChangeType byte
-
-const (
-	DiffInvalid DiffChangeType = iota
-	DiffNone
-	DiffCreate
-	DiffUpdate
-	DiffDestroy
-	DiffDestroyCreate
-
-	// DiffRefresh is only used in the UI for displaying diffs.
-	// Managed resource reads never appear in plan, and when data source
-	// reads appear they are represented as DiffCreate in core before
-	// transforming to DiffRefresh in the UI layer.
-	DiffRefresh // TODO: Actually use DiffRefresh in core too, for less confusion
 )
 
 // multiVal matches the index key to a flatmapped set, list or map
@@ -248,20 +231,20 @@ func (d *ModuleDiff) init() {
 // ChangeType returns the type of changes that the diff for this
 // module includes.
 //
-// At a module level, this will only be DiffNone, DiffUpdate, DiffDestroy, or
-// DiffCreate. If an instance within the module has a DiffDestroyCreate
-// then this will register as a DiffCreate for a module.
-func (d *ModuleDiff) ChangeType() DiffChangeType {
-	result := DiffNone
+// At a module level, this will only be plans.NoOp, plans.Update, plans.Delete, or
+// plans.Create. If an instance within the module has a plans.DeleteThenCreate
+// then this will register as a plans.Create for a module.
+func (d *ModuleDiff) ChangeType() plans.Action {
+	result := plans.NoOp
 	for _, r := range d.Resources {
 		change := r.ChangeType()
 		switch change {
-		case DiffCreate, DiffDestroy:
-			if result == DiffNone {
+		case plans.Create, plans.Delete:
+			if result == plans.NoOp {
 				result = change
 			}
-		case DiffDestroyCreate, DiffUpdate:
-			result = DiffUpdate
+		case plans.DeleteThenCreate, plans.CreateThenDelete, plans.Update:
+			result = plans.Update
 		}
 	}
 
@@ -763,26 +746,26 @@ func (d *InstanceDiff) Copy() (*InstanceDiff, error) {
 	return dCopy.(*InstanceDiff), nil
 }
 
-// ChangeType returns the DiffChangeType represented by the diff
+// ChangeType returns the plans.Action represented by the diff
 // for this single instance.
-func (d *InstanceDiff) ChangeType() DiffChangeType {
+func (d *InstanceDiff) ChangeType() plans.Action {
 	if d.Empty() {
-		return DiffNone
+		return plans.NoOp
 	}
 
 	if d.RequiresNew() && (d.GetDestroy() || d.GetDestroyTainted()) {
-		return DiffDestroyCreate
+		return plans.DeleteThenCreate
 	}
 
 	if d.GetDestroy() || d.GetDestroyDeposed() {
-		return DiffDestroy
+		return plans.Delete
 	}
 
 	if d.RequiresNew() {
-		return DiffCreate
+		return plans.Create
 	}
 
-	return DiffUpdate
+	return plans.Update
 }
 
 // Empty returns true if this diff encapsulates no changes.
